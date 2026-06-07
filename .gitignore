@@ -1,0 +1,33 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+checkpoints/
+
+# Local environments and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+credentials.*.json
+service-account*.json
+secrets.*
+*.secret
+config.local.*
+
+# Local editor/runtime files
+.vscode/
+.idea/
+logs/
+*.log
+.ipynb_checkpoints/
+
+# Model artifacts and large generated files
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.safetensors

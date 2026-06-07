@@ -1,0 +1,6 @@
+torch
+tqdm
+transformers
+sentencepiece==0.2.0
+sacremoses
+hf_xet
