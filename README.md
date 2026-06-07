@@ -26,12 +26,9 @@ NLP/
 
 ## 环境安装
 
-当前 Windows 环境中 PyTorch 已安装在 conda `base` 环境。先在 PowerShell 中激活 `base`：
+当前 Windows 环境中 PyTorch 已安装在 conda `base` 环境。先在 PowerShell 中激活 `base`
 
-```powershell
-& "C:\Users\86133\anaconda3\shell\condabin\conda-hook.ps1"
-conda activate base
-```
+
 
 如果需要重新安装依赖，在激活 `base` 后运行：
 
