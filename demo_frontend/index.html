@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Transformer Translation Demo</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="translator" aria-label="English to Chinese translator">
+        <header class="language-row">
+          <div class="language-pill">English</div>
+          <div class="direction-mark" aria-hidden="true">↓</div>
+          <div class="language-pill">中文（简体）</div>
+        </header>
+
+        <section class="panel input-panel">
+          <div class="panel-heading">
+            <label for="sourceText">输入文本</label>
+            <button id="translateButton" class="translate-button" type="button">
+              翻译
+            </button>
+          </div>
+          <textarea
+            id="sourceText"
+            class="source-input"
+            rows="4"
+            spellcheck="false"
+            placeholder="Tom is a student."
+          ></textarea>
+        </section>
+
+        <div class="between-panels" aria-hidden="true">
+          <span>↓</span>
+        </div>
+
+        <section class="panel output-panel" aria-live="polite">
+          <div class="panel-heading">
+            <span>翻译结果</span>
+            <span id="statusText" class="status-text">等待输入</span>
+          </div>
+          <p id="translationResult" class="translation-result is-muted">
+            输入英文句子后，模型翻译会显示在这里。
+          </p>
+        </section>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>
