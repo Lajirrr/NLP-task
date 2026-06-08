@@ -93,6 +93,48 @@ class DemoServerTest(unittest.TestCase):
         self.assertIn("你好 demo", body)
         self.assertEqual(response.headers.get_content_charset(), "utf-8")
 
+    def test_parse_args_defaults_to_original_model_profile(self):
+        from code.demo_server import parse_args, resolve_checkpoint_paths
+
+        args = parse_args([])
+        checkpoints = resolve_checkpoint_paths(args)
+
+        self.assertEqual(args.model_profile, "original")
+        self.assertIn("char-enhanced", str(checkpoints[0]))
+        self.assertIn("char-adam98-e80", str(checkpoints[1]))
+        self.assertIn("char-tied256-e60", str(checkpoints[2]))
+
+    def test_parse_args_resolves_clean_model_profile(self):
+        from code.demo_server import parse_args, resolve_checkpoint_paths
+
+        args = parse_args(["--model-profile", "clean"])
+        checkpoints = resolve_checkpoint_paths(args)
+
+        self.assertEqual(args.model_profile, "clean")
+        self.assertIn("char-clean-enhanced", str(checkpoints[0]))
+        self.assertIn("char-clean-adam98-e80", str(checkpoints[1]))
+        self.assertIn("char-clean-tied256-e60", str(checkpoints[2]))
+
+    def test_explicit_checkpoint_overrides_model_profile(self):
+        from pathlib import Path
+
+        from code.demo_server import parse_args, resolve_checkpoint_paths
+
+        args = parse_args(
+            [
+                "--model-profile",
+                "clean",
+                "--checkpoint",
+                "checkpoints/custom-a.pt",
+                "checkpoints/custom-b.pt",
+            ]
+        )
+
+        self.assertEqual(
+            resolve_checkpoint_paths(args),
+            [Path("checkpoints/custom-a.pt"), Path("checkpoints/custom-b.pt")],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

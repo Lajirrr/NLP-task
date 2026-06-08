@@ -17,11 +17,21 @@ from code.evaluate import load_checkpoint_model_or_ensemble
 from code.translate import select_device, translate_text
 
 
-DEFAULT_CHECKPOINTS = [
+ORIGINAL_CHECKPOINTS = [
     PROJECT_ROOT / "checkpoints" / "char-enhanced" / "averaged.pt",
     PROJECT_ROOT / "checkpoints" / "char-adam98-e80" / "best.pt",
     PROJECT_ROOT / "checkpoints" / "char-tied256-e60" / "averaged.pt",
 ]
+CLEAN_CHECKPOINTS = [
+    PROJECT_ROOT / "checkpoints" / "char-clean-enhanced" / "averaged.pt",
+    PROJECT_ROOT / "checkpoints" / "char-clean-adam98-e80" / "best.pt",
+    PROJECT_ROOT / "checkpoints" / "char-clean-tied256-e60" / "averaged.pt",
+]
+MODEL_PROFILES = {
+    "original": ORIGINAL_CHECKPOINTS,
+    "clean": CLEAN_CHECKPOINTS,
+}
+DEFAULT_CHECKPOINTS = ORIGINAL_CHECKPOINTS
 FRONTEND_DIR = PROJECT_ROOT / "demo_frontend"
 
 
@@ -75,7 +85,13 @@ def parse_args(argv=None):
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--data-dir", type=Path, default=DATA_DIR)
     parser.add_argument("--frontend-dir", type=Path, default=FRONTEND_DIR)
-    parser.add_argument("--checkpoint", type=Path, nargs="+", default=DEFAULT_CHECKPOINTS)
+    parser.add_argument(
+        "--model-profile",
+        choices=sorted(MODEL_PROFILES),
+        default="original",
+        help="Backend-only model selection. Explicit --checkpoint values override this.",
+    )
+    parser.add_argument("--checkpoint", type=Path, nargs="+", default=None)
     parser.add_argument("--device", choices=["cuda", "cpu", "auto"], default="cuda")
     parser.add_argument("--max-len", type=int, default=64)
     parser.add_argument("--beam-size", type=int, default=4)
@@ -172,9 +188,15 @@ def create_request_handler(frontend_dir: Path, translator):
     return DemoRequestHandler
 
 
+def resolve_checkpoint_paths(args) -> list[Path]:
+    if args.checkpoint:
+        return list(args.checkpoint)
+    return list(MODEL_PROFILES[args.model_profile])
+
+
 def build_translator_from_args(args):
     return DemoTranslator(
-        checkpoint_paths=args.checkpoint,
+        checkpoint_paths=resolve_checkpoint_paths(args),
         data_dir=args.data_dir,
         device_name=args.device,
         max_len=args.max_len,
@@ -189,9 +211,12 @@ def main(argv=None):
     args = parse_args(argv)
     if not args.frontend_dir.exists():
         raise SystemExit(f"Frontend directory not found: {args.frontend_dir}")
-    for checkpoint in args.checkpoint:
+    checkpoint_paths = resolve_checkpoint_paths(args)
+    for checkpoint in checkpoint_paths:
         if not checkpoint.exists():
-            raise SystemExit(f"Checkpoint not found: {checkpoint}")
+            raise SystemExit(
+                f"Checkpoint not found for model profile {args.model_profile!r}: {checkpoint}"
+            )
 
     print("Loading translation model...")
     translator = build_translator_from_args(args)
