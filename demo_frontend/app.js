@@ -14,7 +14,9 @@ function setResult(text, state) {
 function setLoading(isLoading) {
   translateButton.disabled = isLoading;
   translateButton.textContent = isLoading ? "翻译中" : "翻译";
-  statusText.textContent = isLoading ? "模型解码中" : "等待输入";
+  if (isLoading) {
+    statusText.textContent = "模型解码中";
+  }
 }
 
 async function translateCurrentText() {
