@@ -95,6 +95,12 @@ def parse_args(argv=None):
         default=None,
         help="Decode only the first N test examples for quick BLEU/example checks.",
     )
+    parser.add_argument(
+        "--translations-output",
+        type=Path,
+        default=None,
+        help="Write every decoded test translation to a UTF-8 text file.",
+    )
     return parser.parse_args(argv)
 
 
@@ -162,10 +168,13 @@ def evaluate_bleu_and_examples(
     suppress_unk: bool = True,
     no_repeat_ngram_size: int = 0,
     decode_limit: int | None = None,
+    translations_output: Path | None = None,
+    output_metrics: dict[str, str] | None = None,
 ):
     predictions = []
     references = []
     examples = []
+    translation_rows = []
 
     examples_to_decode = dataset.examples
     if decode_limit is not None:
@@ -183,18 +192,61 @@ def evaluate_bleu_and_examples(
             no_repeat_ngram_size=no_repeat_ngram_size,
         )
         pred_tokens = ids_to_tokens(pred_ids, int2word_cn)
+        src_sentence = " ".join(example["src_tokens"])
+        ref_sentence = detokenize_chinese(example["tgt_tokens"])
+        pred_sentence = detokenize_chinese(pred_tokens)
         predictions.append(pred_tokens)
         references.append(example["tgt_tokens"])
+        translation_rows.append(
+            {
+                "index": index + 1,
+                "src": src_sentence,
+                "ref": ref_sentence,
+                "pred": pred_sentence,
+            }
+        )
         if len(examples) < num_examples:
             examples.append(
                 {
-                    "src": " ".join(example["src_tokens"]),
-                    "ref": detokenize_chinese(example["tgt_tokens"]),
-                    "pred": detokenize_chinese(pred_tokens),
+                    "src": src_sentence,
+                    "ref": ref_sentence,
+                    "pred": pred_sentence,
                 }
             )
 
-    return corpus_bleu(predictions, references), examples
+    bleu = corpus_bleu(predictions, references)
+    if translations_output is not None:
+        metrics = dict(output_metrics or {})
+        metrics["Corpus BLEU"] = f"{bleu:.4f}"
+        if decode_limit is not None:
+            metrics["Decoded examples"] = (
+                f"{min(max(decode_limit, 0), len(dataset))}/{len(dataset)}"
+            )
+        write_translations_output(translations_output, translation_rows, metrics=metrics)
+
+    return bleu, examples
+
+
+def write_translations_output(
+    output_path: Path,
+    translations: list[dict[str, object]],
+    metrics: dict[str, str] | None = None,
+):
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write("# Transformer translation predictions\n")
+        handle.write("# Encoding: UTF-8\n")
+        if metrics:
+            for key, value in metrics.items():
+                handle.write(f"{key}: {value}\n")
+        handle.write("\n")
+
+        for row in translations:
+            handle.write(f"[{row['index']}]\n")
+            handle.write(f"EN : {row['src']}\n")
+            handle.write(f"REF: {row['ref']}\n")
+            handle.write(f"PRED: {row['pred']}\n")
+            handle.write("\n")
 
 
 def main():
@@ -236,11 +288,19 @@ def main():
         suppress_unk=not args.allow_unk,
         no_repeat_ngram_size=args.no_repeat_ngram_size,
         decode_limit=args.decode_limit,
+        translations_output=args.translations_output,
+        output_metrics={
+            "Test loss": f"{test_loss:.4f}",
+            "Test perplexity": f"{test_ppl:.2f}",
+            "Target level": target_level,
+        },
     )
 
     print(f"Corpus BLEU: {bleu:.4f}")
     if args.decode_limit is not None:
         print(f"Decoded examples: {min(max(args.decode_limit, 0), len(test_dataset))}/{len(test_dataset)}")
+    if args.translations_output is not None:
+        print(f"Translations saved to: {args.translations_output}")
     print()
     print("Examples:")
     for idx, example in enumerate(examples, start=1):

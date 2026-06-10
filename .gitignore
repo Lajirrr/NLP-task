@@ -24,6 +24,7 @@ config.local.*
 logs/
 *.log
 .ipynb_checkpoints/
+.superpowers/
 
 # Model artifacts and large generated files
 *.pt

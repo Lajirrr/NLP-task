@@ -1,0 +1,249 @@
+:root {
+  color-scheme: light;
+  --page: #f3f5f4;
+  --shell: rgba(255, 255, 255, 0.68);
+  --surface: #ffffff;
+  --surface-soft: #f8faf9;
+  --border: #d9dedb;
+  --text: #4d5257;
+  --muted: #747c84;
+  --accent: #2f6f6a;
+  --accent-strong: #244f4b;
+  --danger: #9b3030;
+  --shadow: 0 24px 70px rgba(43, 55, 64, 0.13);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(243, 245, 244, 0.92)),
+    var(--page);
+  color: var(--text);
+  font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
+}
+
+button,
+textarea {
+  font: inherit;
+}
+
+.page-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 18px;
+}
+
+.translator {
+  width: min(920px, 100%);
+  background: var(--shell);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 8px;
+  padding: 22px;
+  box-shadow: var(--shadow);
+}
+
+.language-row {
+  display: grid;
+  grid-template-columns: 1fr 42px 1fr;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.language-pill {
+  height: 42px;
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.direction-mark,
+.between-panels {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.direction-mark {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--accent-strong);
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.panel {
+  min-height: 190px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.input-panel {
+  background: var(--surface);
+}
+
+.output-panel {
+  background: var(--surface-soft);
+}
+
+.panel-heading {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  color: var(--muted);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.source-input {
+  width: 100%;
+  min-height: 112px;
+  resize: vertical;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+.source-input::placeholder {
+  color: #b4b9bd;
+}
+
+.translate-button {
+  min-width: 92px;
+  height: 42px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.translate-button:hover {
+  background: var(--accent-strong);
+}
+
+.translate-button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.between-panels {
+  height: 48px;
+  color: var(--accent-strong);
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.status-text {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.translation-result {
+  min-height: 92px;
+  margin: 0;
+  color: var(--text);
+  font-size: 42px;
+  font-weight: 850;
+  line-height: 1.32;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.translation-result.is-muted {
+  color: #9ba1a6;
+  font-weight: 750;
+}
+
+.translation-result.is-error {
+  color: var(--danger);
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.translation-result.is-success {
+  animation: result-in 180ms ease-out;
+}
+
+@keyframes result-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .page-shell {
+    align-items: stretch;
+    padding: 16px;
+  }
+
+  .translator {
+    padding: 16px;
+  }
+
+  .language-row {
+    grid-template-columns: 1fr;
+  }
+
+  .direction-mark {
+    width: 100%;
+    border-radius: 8px;
+  }
+
+  .panel {
+    min-height: 168px;
+    padding: 18px;
+  }
+
+  .panel-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .source-input {
+    font-size: 28px;
+  }
+
+  .translate-button {
+    width: 100%;
+  }
+
+  .translation-result {
+    font-size: 30px;
+  }
+
+  .translation-result.is-error {
+    font-size: 24px;
+  }
+}
